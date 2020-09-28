@@ -20,6 +20,13 @@ public class HpJavassist {
 
         try {
             ClassPool pool=ClassPool.getDefault();
+
+            //设置监听器
+//            Translator translator=new HpTranslator();
+//            Loader cl = new Loader();
+//            cl.addTranslator(pool, translator);
+//            cl.run("MyApp", args);
+
             //创建一个类
             CtClass ctClass=pool.makeClass("HpJavassist$Adapt");
             //创建一个属性
@@ -58,9 +65,13 @@ public class HpJavassist {
 
             //写入文件
             String path=HpJavassist.class.getResource("/").getPath();
+            ctClass.defrost();
+            ctClass.setSuperclass(ctClass);
             ctClass.writeFile(path+"com/hp/javassist/javassistDemo");
         } catch (Exception e) {
             e.printStackTrace();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
     }
 
@@ -83,7 +94,28 @@ public class HpJavassist {
             method.invoke(overview);
             //(2)直接重写入class文件
             String path=HpJavassist.class.getResource("/").getPath();
+//            //writeFile之后 此class文件会被冻结 不允许被修改
             ctClass.writeFile(path);
+
+            //设置可以再次修改
+            ctClass.defrost();
+            //(3)修改原class 方法
+            CtMethod change=ctClass.getDeclaredMethod("change");
+
+            //
+//            change.instrument(new ExprEditor(){
+//                @Override
+//                public void edit(MethodCall m) throws CannotCompileException {
+//                    if (m.getMethodName().equals("change")){
+//                        m.replace("{ $_ = \"After\"; }");
+//                    }
+//                }
+//            });
+
+            change.setModifiers(Modifier.PUBLIC);
+            change.setBody("return \"After\";");
+            String pathChange=HpJavassist.class.getResource("/").getPath();
+            ctClass.writeFile(pathChange);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -18,7 +18,8 @@ public class HpJavassistAutoConfigration {
     public ApplicationRunner applicationRunner(){
         return args -> {
             HpJavassist.buildClass();
-            HpJavassist.addMethod();
+//            HpJavassist.addMethod();
         };
     }
+
 }
